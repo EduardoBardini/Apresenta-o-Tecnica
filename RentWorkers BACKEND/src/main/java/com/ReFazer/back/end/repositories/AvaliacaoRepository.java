@@ -7,5 +7,5 @@ import com.ReFazer.back.end.entities.AvaliacaoEntity;
 
 @Repository
 public interface AvaliacaoRepository extends JpaRepository<AvaliacaoEntity, Long>{
-    
+    void deleteById(Long id);
 }

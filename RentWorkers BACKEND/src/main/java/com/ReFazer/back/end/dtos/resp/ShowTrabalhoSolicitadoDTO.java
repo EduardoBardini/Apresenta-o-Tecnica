@@ -6,6 +6,28 @@ public class ShowTrabalhoSolicitadoDTO {
     private String localizacao;
     private String descricao;
     private boolean status;
+    private long id_trabalhador;
+    private long id_cliente;
+    private long id_trabalho_solicitado;
+    
+    public long getId_trabalhador() {
+        return id_trabalhador;
+    }
+    public long getId_trabalho_solicitado() {
+        return id_trabalho_solicitado;
+    }
+    public void setId_trabalho_solicitado(long id_trabalho_solicitado) {
+        this.id_trabalho_solicitado = id_trabalho_solicitado;
+    }
+    public void setId_trabalhador(long id_trabalhador) {
+        this.id_trabalhador = id_trabalhador;
+    }
+    public long getId_cliente() {
+        return id_cliente;
+    }
+    public void setId_cliente(long id_cliente) {
+        this.id_cliente = id_cliente;
+    }
     public String getTipo() {
         return tipo;
     }

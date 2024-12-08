@@ -20,4 +20,6 @@ public interface UsuarioRepository extends JpaRepository<UsuarioEntity,Long> {
     
     List<UsuarioEntity> findByTipoUsuario(String tipoUsuario);
 
+    void deleteById(Long id);
+
 }

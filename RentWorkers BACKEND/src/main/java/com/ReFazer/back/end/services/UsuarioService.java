@@ -18,6 +18,7 @@ import com.ReFazer.back.end.dtos.req.CreateUsuarioDTO;
 import com.ReFazer.back.end.dtos.resp.ShowAvaliacaoDTO;
 import com.ReFazer.back.end.dtos.resp.ShowTrabalhoSolicitadoDTO;
 import com.ReFazer.back.end.dtos.resp.ShowUsuarioDTO;
+import com.ReFazer.back.end.entities.AvaliacaoEntity;
 // import com.ReFazer.back.end.entities.AvaliacaoEntity;
 import com.ReFazer.back.end.entities.TrabalhoSolicitadoEntity;
 import com.ReFazer.back.end.entities.UsuarioEntity;
@@ -32,7 +33,7 @@ import jakarta.transaction.Transactional;
 public class UsuarioService {
 
     private String mensagemLogin;
-    
+
     @Autowired
 
     UsuarioRepository usuarioRepository;
@@ -134,35 +135,29 @@ public class UsuarioService {
     public boolean loginUsuario(String email, String password) {
         // Busca o usuário pelo email
         UsuarioEntity usuario = usuarioRepository.findByEmail(email);
-        
+
         // Verifica se o usuário não existe
         if (usuario == null) {
             mensagemLogin = "Conta não existe.";
             return false; // Retorna false se o usuário não existe
         }
-        
+
         // // Verifica se a senha está incorreta
         // if (!usuario.getPassword().equals(password)) {
-        //     mensagemLogin = "Senha ou Email incorretos.";
-        //     return false; // Retorna false se a senha está incorreta
+        // mensagemLogin = "Senha ou Email incorretos.";
+        // return false; // Retorna false se a senha está incorreta
         // }
-        
+
         // Caso o login seja bem-sucedido
         mensagemLogin = "Login bem-sucedido.";
         return true; // Retorna true se o login for bem-suced
-    
-        
+
     }
-    
-    
-    
-    
+
     public String getMensagemLogin() {
         return mensagemLogin; // Método para obter a mensagem de login
     }
-    
-    
-    
+
     public List<ShowUsuarioDTO> getAllUsuarios() {
         List<UsuarioEntity> usuarioEntity = usuarioRepository.findAll();
 
@@ -216,11 +211,11 @@ public class UsuarioService {
             trabalhadorDto.setTelefone(trabalhador.getTelefone());
             trabalhadorDto.setUsername(trabalhador.getUsernameFromEntity());
             trabalhadorDto.setEspecialidade(trabalhador.getEspecialidade());
-            trabalhadorDto.setCep(trabalhador.getCep()); 
-        
+            trabalhadorDto.setCep(trabalhador.getCep());
+
             return trabalhadorDto;
 
-        }).toList();        
+        }).toList();
     }
 
     // public UsuarioEntity getUsuarioEntityById(Long id_usuario) {
@@ -230,16 +225,16 @@ public class UsuarioService {
 
     public ShowUsuarioDTO getUsuarioById(Long id_usuario) {
         Optional<UsuarioEntity> optionalUsuarioEntity = usuarioRepository.findById(id_usuario);
-    
+
         // Verifica se o usuário foi encontrado
         if (optionalUsuarioEntity.isEmpty()) {
             throw new RuntimeException("Usuário não encontrado");
         }
-    
+
         // Obtém a entidade do usuário
         UsuarioEntity usuarioEntity = optionalUsuarioEntity.get();
         ShowUsuarioDTO dto = new ShowUsuarioDTO();
-        
+
         // Preenche os dados do DTO
         dto.setId_usuario(usuarioEntity.getId_Usuario());
         dto.setUsername(usuarioEntity.getUsernameFromEntity());
@@ -249,7 +244,7 @@ public class UsuarioService {
         dto.setTelefone(usuarioEntity.getTelefone());
         dto.setCep(usuarioEntity.getCep());
         dto.setTipoUsuario(usuarioEntity.getTipoUsuario());
-    
+
         // Verifica se a avaliação não é null e preenche o DTO de avaliação
         if (usuarioEntity.getAvaliacao() != null) {
             ShowAvaliacaoDTO avaliacaoDTO = new ShowAvaliacaoDTO();
@@ -263,7 +258,7 @@ public class UsuarioService {
             avaliacaoDTO.setTexto_avaliativo("Sem avaliação"); // Texto padrão
             dto.setAvaliacao(avaliacaoDTO);
         }
-    
+
         // Preenche os dados dos trabalhos solicitados
         List<ShowTrabalhoSolicitadoDTO> trabalhosSolicitadosDTO = new ArrayList<>();
         for (TrabalhoSolicitadoEntity trabalho : usuarioEntity.getTrabalhos()) {
@@ -275,13 +270,13 @@ public class UsuarioService {
             trabalhoDTO.setStatus(trabalho.isStatus());
             trabalhosSolicitadosDTO.add(trabalhoDTO);
         }
-    
+
         // Adiciona os trabalhos solicitados ao DTO
         dto.setTrabalhos(trabalhosSolicitadosDTO);
-    
+
         return dto;
     }
-    
+
     // public void save(UsuarioEntity usuario) {
     // usuarioRepository.save(usuario);
     // }
@@ -289,25 +284,39 @@ public class UsuarioService {
     @Transactional
     public void deleteUsuarioById(long id_usuario) {
 
-        Optional<UsuarioEntity> optionalUsuarioEntity = usuarioRepository.findById(id_usuario);
+        // Buscar todos os trabalhos solicitados e avaliações
+        List<TrabalhoSolicitadoEntity> trabalhos = trabalhoSolicitadoRepository.findAll();
+        List<AvaliacaoEntity> avaliacoes = avaliacaoRepository.findAll();
 
-        if (optionalUsuarioEntity.isEmpty()) {
-            // jogar uma excecao
+        // Atualizar os trabalhos solicitados para remover as referências ao usuário
+        for (int i = 0; i < trabalhos.size(); i++) {
+            if (trabalhos.get(i).getUsuario().getId_Usuario().equals(id_usuario)) {
+                System.out.println("Estou aqui e trabalho" + trabalhos.get(i).getId_trabalho_solicitado());
+                trabalhos.get(i).setUsuario(null); // Remover referência ao usuário
+                trabalhoSolicitadoRepository.deleteById(trabalhos.get(i).getId_trabalho_solicitado());
+            }
 
+            // Se o usuário for cliente de algum trabalho, remover também essa referência
+            if (trabalhos.get(i).getTrabalhador() != null
+                    && trabalhos.get(i).getTrabalhador().getId_Usuario().equals(id_usuario)) {
+                trabalhos.get(i).setUsuario(null);
+                trabalhoSolicitadoRepository.save(trabalhos.get(i)); // Salvar a atualização
+                trabalhoSolicitadoRepository.deleteById(trabalhos.get(i).getId_trabalho_solicitado());
+            }
         }
 
-        UsuarioEntity usuarioEntity = optionalUsuarioEntity.get();
-
-        if (usuarioEntity.getId_Usuario() != null) {
-            usuarioRepository.deleteById(id_usuario);
-
-        } else {
-
-            // throw new deletableException();
-
+        // Remover as avaliações do usuário
+        for (int i = 0; i < avaliacoes.size(); i++) {
+            if (avaliacoes.get(i).getUsuario().getId_Usuario().equals(id_usuario)) {
+                avaliacaoRepository.deleteById(avaliacoes.get(i).getId_avaliacao());
+            }
         }
 
+        // Finalmente, excluir o usuário
+        usuarioRepository.deleteById(id_usuario);
     }
+
+    
 
     // @Transactional
     // public void deleteAvaliacaoById(Long id_avaliacao) {
@@ -354,29 +363,30 @@ public class UsuarioService {
     @Transactional
     public void changeUsuarioInfosById(long id_usuario, ChangeUsuarioDTO dto) {
         System.out.println("Iniciando a atualização dos dados do usuário com ID: " + id_usuario);
-    
+
         // Recupera o usuário opcional
         Optional<UsuarioEntity> optionalUsuarioEntity = usuarioRepository.findById(id_usuario);
-    
+
         if (optionalUsuarioEntity.isEmpty()) {
             throw new UsuarioNaoEncontradoException("Usuário não encontrado");
         }
 
-        UsuarioEntity usuario = usuarioRepository.findById(id_usuario).orElseThrow(() -> new UsuarioNaoEncontradoException("Usuário não encontrado"));
+        UsuarioEntity usuario = usuarioRepository.findById(id_usuario)
+                .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuário não encontrado"));
 
         // Verifica se a senha atual informada é correta
         if (dto.getPassword() != null && !usuario.getPassword().equals(dto.getPassword())) {
             throw new SenhaIncorretaException("Senha atual incorreta");
         }
-    
+
         UsuarioEntity usuarioEntity = optionalUsuarioEntity.get();
-    
+
         // Atualiza apenas os campos fornecidos no DTO
         if (dto.getEmail() != null) {
             usuarioEntity.setEmail(dto.getEmail());
         }
 
-        if(dto.getNewPassword() != null){
+        if (dto.getNewPassword() != null) {
             usuarioEntity.setPassword(dto.getNewPassword());
 
         }
@@ -390,18 +400,16 @@ public class UsuarioService {
         if (!isNullOrEmpty(dto.getTipoUsuario())) {
             usuarioEntity.setTipoUsuario(dto.getTipoUsuario());
         }
-    
+
         System.out.println("Atualizando dados do usuário...");
         usuarioRepository.save(usuarioEntity);
         System.out.println("Dados do usuário atualizados com sucesso.");
     }
-    
-private boolean isNullOrEmpty(String str) {
-    return str == null || str.trim().isEmpty();
-}
 
-    
-    
+    private boolean isNullOrEmpty(String str) {
+        return str == null || str.trim().isEmpty();
+    }
+
     // @Transactional
     // public void changeAvaliacaoInfoByid(long id_avaliacao, ChangeAvaliacaoDTO
     // dto) {

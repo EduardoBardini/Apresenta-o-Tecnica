@@ -39,8 +39,15 @@ function TelaLogin() {
             try {
                 const response = await api.post('/auth/login', loginData);
                 login(response.data.token, response.data.usuario);
-                navigate("/telaprincipal")
-                window.location.reload()
+                const usuario = response.data.usuario;
+                console.log(usuario)
+                if(usuario.tipoUsuario == "CLIENTE") {
+                    navigate("/telaprincipal")
+                    window.location.reload()
+                }else {
+                    navigate("/perfil")
+                }
+                
             } catch (error) {
                 alert("Usuario não existe")
                 setSenha("")

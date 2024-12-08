@@ -12,6 +12,8 @@ import java.util.List;
 @Repository
 public interface TrabalhoSolicitadoRepository extends JpaRepository<TrabalhoSolicitadoEntity, Long> {
     Optional<TrabalhoSolicitadoEntity> findByTipo(String tipo);
-    Optional<TrabalhoSolicitadoEntity> findById(Long id);  // Alterar para o nome correto da chave primária
-}
+    Optional<TrabalhoSolicitadoEntity> findById(Long id);
+    void deleteById(Long id);
+}  
+    
 

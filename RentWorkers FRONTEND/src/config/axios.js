@@ -58,6 +58,9 @@ export const excluirUsuario = (id) => {
     return axios.delete(`http://127.0.0.1:8080/usuarios/${id}`)
 }
 
+export const trabalhosVinculadosAoTrabalhadorLogado = (id) => {
+    return axios.get(`http://localhost:8080/trabalhos/trabalhador/${id}`);
+}
 
 
 export const atualizarUsuario = async (dadosAtualizado) => {

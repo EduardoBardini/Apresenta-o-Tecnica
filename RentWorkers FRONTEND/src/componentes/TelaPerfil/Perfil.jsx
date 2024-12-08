@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import "./Perfil.css";
 import { listaUsuarios } from "../../config/axios";
-import { atualizarUsuario, dadosUsuarioLogado, excluirUsuario } from "../../config/axios";
+import { atualizarUsuario, dadosUsuarioLogado, excluirUsuario, trabalhosVinculadosAoTrabalhadorLogado} from "../../config/axios";
 import { UserContext } from "../../context/GlobalContext";
 import CardTrabalho from "./CardTrabalho";
 import { useNavigate } from "react-router-dom";
@@ -38,10 +38,6 @@ function Perfil() {
 
                     localStorage.setItem('usuario', JSON.stringify(response.data))
 
-                    if (response.data.trabalhos) {
-                        setTrabalhos(response.data.trabalhos);
-                    }
-
                     localStorage.setItem('usuario', JSON.stringify(response.data))
 
                     console.log(response.data);
@@ -49,6 +45,10 @@ function Perfil() {
                 .catch((error) => {
                     console.log("Erro ao carregar dados do usuário:", error);
                 });
+
+                trabalhosVinculadosAoTrabalhadorLogado(usuario.id_usuario).then((response) =>{
+                    setTrabalhos(response.data);
+                })
         } else {
             console.log("Não está logado");
         }
@@ -123,6 +123,7 @@ function Perfil() {
         })
         
         localStorage.clear();
+        navigate('/')
     }
 
     return (
@@ -130,7 +131,7 @@ function Perfil() {
             <div className="divPerfil">
                 <div className="div-cima">
                     <img className="imgPerfilum" src="/images/download 46 (1).png" alt="Perfil" />
-                    <p className="fonteNome">{username}</p>
+                    <p className="fonteNome">PAINEL DO TRABALHADOR</p>
                 </div>
 
                 <div className="divPerfil-Esquerda">

@@ -1,6 +1,6 @@
 
 import '../TelaHome/PaginaHome.css'
-import ParteHome from './parteHome';
+import ParteHome from './ParteHome';
 
 
 function PaginaHome() {

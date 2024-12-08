@@ -37,30 +37,38 @@ function TelaPrincipal() {
 
 
   const handleSearchChange = (e) => {
-    
-    
     setInptSearch(e.target.value);
     if (trabalhadores.length > 0) {
-      for (let i = 0; i < trabalhadores.length; i++ ){
-         if(trabalhadores[i].especialidade == e.target.value) {
+      for (let i = 0; i < trabalhadores.length; i++) {
+        if (trabalhadores[i].especialidade == e.target.value) {
           setTrabalhadoresPesquisados([...trabalhadoresPesquisados, trabalhadores[i]])
-         }
+        }
       }
     }
   }
 
 
-  const abrirModal = (trabalhador) => {
+  const abrirModal = (trabalhador, usuario) => {
     setTrabalhadorSelecionado(trabalhador);
     setId_trabalhador(trabalhador.id_usuario);
     setModalIsOpen(true);
     setLocalizacao(trabalhador.cep);
-    obterCidadeEstado(trabalhador.cep);
+    obterCidadeEstadoCliente(usuario.cep);
+    obterCidadeEstadoTrabalhador(trabalhador.cep)
   };
 
-  const fecharModal = () => setModalIsOpen(false);
+  const fecharModal = () => {
+    setModalIsOpen(false);
+    setDescricaoProblema('');
+    setValorOferecido('');
+    setRua('');
+    setBairro('');
+    setCidade('');
+    setEstado('');
+    setNumeroCasa('');
+  };
 
-  const obterCidadeEstado = async (cep) => {
+  const obterCidadeEstadoCliente = async (cep) => {
 
     try {
       const response = await axios.get(`https://viacep.com.br/ws/${cep}/json/`);
@@ -71,7 +79,23 @@ function TelaPrincipal() {
         setBairro(response.data.bairro);
         setEstado(response.data.uf);
         setCidade(response.data.localidade);
-        setLocalizacao(`${response.data.localidade} / ${response.data.uf}`);
+      } else {
+        setLocalizacao('Localização não encontrada');
+      }
+    } catch (error) {
+      console.error('Erro ao buscar a localização:', error);
+      setLocalizacao('Erro ao buscar localização');
+    }
+  };
+
+  const obterCidadeEstadoTrabalhador = async (cep) => {
+
+    try {
+      const response = await axios.get(`https://viacep.com.br/ws/${cep}/json/`);
+      if (response.data.erro) {
+        setLocalizacao('Localização não encontrada');
+      } else if (response.data.localidade && response.data.uf) {
+        setLocalizacao(`${response.data.localidade} / ${response.data.uf}`)
       } else {
         setLocalizacao('Localização não encontrada');
       }
@@ -82,7 +106,7 @@ function TelaPrincipal() {
   };
 
   const enviarSolicitacao = async () => {
-  
+
     const idUsuarioLogado = usuario.id_usuario;
     if (!idUsuarioLogado) {
       console.error('ID do usuário não encontrado');
@@ -130,7 +154,7 @@ function TelaPrincipal() {
                 className="option-padrao"
                 onChange={(e) => {
                   if (e.target.value === "perfil") {
-                    navigate('/perfil');
+                    navigate('/telaperfilcliente');
                   } else if (e.target.value === "sair") {
                     navigate('/login');
                     logout();
@@ -152,12 +176,12 @@ function TelaPrincipal() {
             username={trabalhador.username}
             localizacao={trabalhador.cep}
             especializacao={trabalhador.especialidade}
-            onClick={() => abrirModal(trabalhador)}
+            onClick={() => abrirModal(trabalhador, usuario)}
           />
-          
+
         ))}
-        
-       
+
+
       </div>
       <Modal
         isOpen={modalIsOpen}

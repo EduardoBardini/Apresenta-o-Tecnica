@@ -8,8 +8,8 @@ import TelaLogin from './componentes/TelaLogin/TelaLogin.jsx';
 import TelaCadastro from './componentes/TelaCadastro/TelaCadastro.jsx';
 import TelaPrincipal from './componentes/TelaPrincipal/TelaPrincipal.jsx';
 import Perfil from './componentes/TelaPerfil/Perfil.jsx';
+import TelaPerfilCliente from './componentes/TelaPerfilCliente/TelaPerfilCliente.jsx';
 
-import EditarPerfil from './componentes/TelaEditarPerfil/EditarPerfil.jsx';
 import Cliente from './componentes/TelaCliente/Cliente.jsx';
 
 import ProtectedRoute from './componentes/verificacao/ProtectedRoute.jsx';
@@ -36,14 +36,6 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/EditarPerfil",
-    element: (
-      <ProtectedRoute>
-        <EditarPerfil />
-      </ProtectedRoute>
-    ),
-  },
-  {
     path: "/cliente",
     element: (
       <ProtectedRoute>
@@ -58,6 +50,10 @@ const router = createBrowserRouter([
   {
     path: "/cadastro",
     element: <TelaCadastro />,
+  },
+  {
+    path: "/telaperfilcliente",
+    element: <TelaPerfilCliente />
   },
   {
     path: "/telatrabalhador",

@@ -20,9 +20,15 @@ import com.ReFazer.back.end.dtos.req.ChangeStatusTrabalhoDTO;
 import com.ReFazer.back.end.dtos.req.ChangeTrabalhoSolicitadoDTO;
 import com.ReFazer.back.end.dtos.req.CreateTrabalhoSolicitadoDTO;
 import com.ReFazer.back.end.dtos.resp.ShowTrabalhoSolicitadoDTO;
+import com.ReFazer.back.end.entities.TrabalhoSolicitadoEntity;
 import com.ReFazer.back.end.entities.UsuarioEntity;
 import com.ReFazer.back.end.repositories.UsuarioRepository;
 import com.ReFazer.back.end.services.TrabalhoSolicitadoService;
+
+import io.micrometer.core.ipc.http.HttpSender.Response;
+
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController
 @RequestMapping("/trabalhos")
@@ -45,26 +51,20 @@ public class TrabalhoSolicitadoController {
         }
     
 
-            System.out.println("Tipo: " + dto.getTipo());
-            System.out.println("Valor: " + dto.getValor());
-            System.out.println("Localização: " + dto.getLocalizacao());
-            System.out.println("Descrição: " + dto.getDescricao());
-            System.out.println("Status: " + dto.isStatus());
-    
-            if (dto.getId_cliente() != null) {
-                UsuarioEntity cliente = usuarioRepository.findById(dto.getId_cliente())
-                        .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
-                trabalhoSolicitadoService.createTrabalhoSolicitado(dto, cliente);
-            }
-            
-            if(dto.getId_trabalhador() != null) {
-                UsuarioEntity trabalhador = usuarioRepository.findById(dto.getId_trabalhador()).orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
-                trabalhoSolicitadoService.createTrabalhoSolicitado(dto, trabalhador);
-            }
-    
-            return ResponseEntity.status(201).body("Solicitação de trabalho criada com sucesso.");
-    
-       
+         System.out.println("Tipo: " + dto.getTipo());
+         System.out.println("Valor: " + dto.getValor());
+         System.out.println("Localização: " + dto.getLocalizacao());
+         System.out.println("Descrição: " + dto.getDescricao());
+         System.out.println("Status: " + dto.isStatus());
+
+         if (dto.getId_cliente() != null) {
+             UsuarioEntity cliente = usuarioRepository.findById(dto.getId_cliente())
+                     .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
+             trabalhoSolicitadoService.createTrabalhoSolicitado(dto, cliente);
+         }
+
+         return ResponseEntity.status(201).body("Solicitação de trabalho criada com sucesso.");
+
     }
 
     @GetMapping
@@ -86,6 +86,14 @@ public class TrabalhoSolicitadoController {
             return ResponseEntity.status(404).body("Erro: " + e.getMessage());
         }
     }
+
+    @GetMapping("/trabalhador/{id_usuario}")
+    public ResponseEntity<?> getTrabalhoByIdTrabalhador(@PathVariable Long id_usuario) {
+        List<ShowTrabalhoSolicitadoDTO> trabalhosVerificados =  trabalhoSolicitadoService.getTrabalhosByIdTrabalhador(id_usuario);
+
+        return ResponseEntity.status(200).body(trabalhosVerificados);
+    }
+    
     
 
     @PatchMapping("{id_trabalho_solicitado}")

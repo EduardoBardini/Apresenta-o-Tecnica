@@ -76,6 +76,31 @@ public class TrabalhoSolicitadoService {
         trabalhoSolicitadoRepository.save(trabalho);
     }
 
+    @Transactional
+    public List<ShowTrabalhoSolicitadoDTO> getTrabalhosByIdTrabalhador(long id_usuario) {
+        List<TrabalhoSolicitadoEntity> trabalhos = trabalhoSolicitadoRepository.findAll();
+        
+        ShowTrabalhoSolicitadoDTO trabalho = new ShowTrabalhoSolicitadoDTO();
+        List<ShowTrabalhoSolicitadoDTO> trabalhosFiltrados = new ArrayList<>();
+        
+        for(int i = 0; i < trabalhos.size(); i++) {
+            if(trabalhos.get(i).getTrabalhador().getId_Usuario().equals(id_usuario)) {
+                trabalho.setId_trabalho_solicitado(trabalhos.get(i).getId_trabalho_solicitado());
+                trabalho.setId_trabalhador(trabalhos.get(i).getTrabalhador().getId_Usuario());
+                trabalho.setId_cliente(trabalhos.get(i).getUsuario().getId_Usuario());
+                trabalho.setTipo(trabalhos.get(i).getTipo());
+                trabalho.setDescricao(trabalhos.get(i).getDescricao());
+                trabalho.setValor(trabalhos.get(i).getValor());
+                trabalho.setLocalizacao(trabalhos.get(i).getLocalizacao());
+                trabalho.setStatus(trabalhos.get(i).isStatus());
+                
+                trabalhosFiltrados.add(trabalho);
+            }
+        }
+        
+        return trabalhosFiltrados;
+    }
+
     // public void postaTrabalhoAoTrabalhador( CreateTrabalhoSolicitadoDTO dto ) { 
     //     List<TrabalhoSolicitadoEntity> trabalho = trabalhoSolicitadoRepository.findAll();
 
